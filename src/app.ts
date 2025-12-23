@@ -134,12 +134,12 @@ function handleHueSwitch(state: HueState) {
     } else if (brightnessMoveStart.includes(state)) {
         const stepSize = 25;
         desiredState = {
-            "brightness_move": state.startsWith("UP") ? stepSize : 0 - stepSize
+            "brightness_step": state.startsWith("UP") ? stepSize : 0 - stepSize
         }
     } else if (brightnessMoveStop.includes(state)) {
-        desiredState = {
+        /* desiredState = {
             "brightness_move": 0
-        }
+        }*/
     }
     client.publish(setLivingRoomLampTopic, JSON.stringify(desiredState));
 }
