@@ -113,10 +113,10 @@ client.on("message", (topic, payload) => {
 });
 
 function handleHueSwitch(state: HueState) {
-    const stateToggles: HueState[] = ["ON_PRESS", "ON_HOLD", "OFF_PRESS", "OFF_HOLD"];
-    const brightnessToggles: HueState[] = ["UP_PRESS", "DOWN_PRESS"];
-    const brightnessMoveStart: HueState[] = ["UP_HOLD", "DOWN_HOLD"];
-    const brightnessMoveStop: HueState[] = ["UP_HOLD_RELEASE", "DOWN_HOLD_RELEASE"];
+    const stateToggles: HueState[] = ["ON_PRESS", "ON_HOLD", "OFF_PRESS", "OFF_HOLD"] as const;
+    const brightnessToggles: HueState[] = ["UP_PRESS", "DOWN_PRESS"] as const;
+    const brightnessMoveStart: HueState[] = ["UP_HOLD", "DOWN_HOLD"] as const;
+    const brightnessMoveStop: HueState[] = ["UP_HOLD_RELEASE", "DOWN_HOLD_RELEASE"] as const;
 
     let desiredState = {};
 
