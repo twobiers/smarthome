@@ -21,6 +21,10 @@ export type HueState =
 
 export type SleepAsAndroidEvent = SimpleEvent | AlarmSnoozeEvent | TimeToBedEvent | ShowSkipNextEvent | AlarmEvent;
 
+export type ActionState = {
+    state: Lowercase<State> | Uppercase<State>;
+}
+
 export type SimpleEvent = {
     event: SoundEvent | SnoringEvent | ApneaEvent | AwakeEvent | SleepEvent | LullabyEvent | SleepTrackingEvent
 };

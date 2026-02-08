@@ -1,11 +1,11 @@
 import * as mqtt from "mqtt";
-import { HueState, SleepAsAndroidEvent, State } from "./types";
+import { ActionState, HueState, SleepAsAndroidEvent, State } from "./types";
 import dotenv from "dotenv";
 import { stat } from "fs";
 
 dotenv.config();
 
-const kitchenSwitchTopic = "zigbee2mqtt/switch_kitchen_1/action";
+const kitchenSwitchTopic = "zigbee2mqtt/switch_kitchen_1";
 const setKitchenLampTopic = "zigbee2mqtt/lamp_kitchen_1/set";
 const setBedroomLampTopic = "zigbee2mqtt/lamp_bedroom_1/set";
 const setLivingRoomLampTopic = "zigbee2mqtt/lamp_living_room_1/set";
@@ -99,7 +99,7 @@ client.on("message", (topic, payload) => {
         }
     }
     else if (topic === kitchenSwitchTopic) {
-        const state = payload.toString().toUpperCase() as State;
+        const state = (payload as ActionState).state.toUpperCase();
         const desiredLampState = { state };
         client.publish(setKitchenLampTopic, JSON.stringify(desiredLampState));
     }
