@@ -25,6 +25,10 @@ export type ActionState = {
     action: Lowercase<State> | Uppercase<State>;
 }
 
+export type ActionHueState = {
+    action: Lowercase<HueState> | Uppercase<HueState>;
+}
+
 export type SimpleEvent = {
     event: SoundEvent | SnoringEvent | ApneaEvent | AwakeEvent | SleepEvent | LullabyEvent | SleepTrackingEvent
 };

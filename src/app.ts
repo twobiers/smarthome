@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt";
-import { ActionState, HueState, SleepAsAndroidEvent, State } from "./types";
+import { ActionHueState, ActionState, HueState, SleepAsAndroidEvent, State } from "./types";
 import dotenv from "dotenv";
 import { stat } from "fs";
 
@@ -10,7 +10,7 @@ const setKitchenLampTopic = "zigbee2mqtt/lamp_kitchen_1/set";
 const setBedroomLampTopic = "zigbee2mqtt/lamp_bedroom_1/set";
 const setLivingRoomLampTopic = "zigbee2mqtt/lamp_living_room_1/set";
 const getLivingRoomLampTopic = "zigbee2mqtt/lamp_living_room_1";
-const livingRoomSwitchTopic = "zigbee2mqtt/switch_living_room_1/action";
+const livingRoomSwitchTopic = "zigbee2mqtt/switch_living_room_1";
 const sleepAsAndroidTopic = "SleepAsAndroid";
 
 // Smarthome bridge
@@ -104,7 +104,7 @@ client.on("message", (topic, payload) => {
         client.publish(setKitchenLampTopic, JSON.stringify(desiredLampState));
     }
     else if (topic === livingRoomSwitchTopic) {
-        const state = payload.toString().toUpperCase() as HueState;
+        const state = ((JSON.parse(payload.toString()) as ActionHueState).action.toUpperCase() as HueState);
         handleHueSwitch(state);
     }
     else {
