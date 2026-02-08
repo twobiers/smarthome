@@ -99,7 +99,7 @@ client.on("message", (topic, payload) => {
         }
     }
     else if (topic === kitchenSwitchTopic) {
-        const state = (payload as ActionState).state.toUpperCase();
+        const state = (JSON.parse(payload.toString()) as ActionState).state.toUpperCase();
         const desiredLampState = { state };
         client.publish(setKitchenLampTopic, JSON.stringify(desiredLampState));
     }
