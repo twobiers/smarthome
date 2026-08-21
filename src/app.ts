@@ -2,6 +2,7 @@ import * as mqtt from "mqtt";
 import { ActionHueState, ActionState, HueState, SleepAsAndroidEvent, State } from "./types";
 import dotenv from "dotenv";
 import { stat } from "fs";
+import { logger } from "./logger";
 
 dotenv.config();
 
@@ -48,20 +49,19 @@ const resetTimeout = () => {
 const subscribe = (topic: string) => {
     client.subscribe(topic, (err) => {
         if (!err) {
-            console.log(`Successfully subscribed to topic '${topic}'`);
+            logger.info({ topic }, "Subscribed to topic");
         } else {
-            console.error(err);
-            console.error(`Could not subscribe to topic '${topic}'`);
+            logger.error({ err, topic }, "Failed to subscribe to topic");
         }
     });
 }
 
 client.on("error", (err) => {
-    console.error("Could not connect to MQTT Broker:", err);
+    logger.error({ err }, "Could not connect to MQTT broker");
 });
 
 client.on("connect", () => {
-    console.log("Successfully connected to MQTT Broker");
+    logger.info("Connected to MQTT broker");
 });
 
 subscribe(sleepAsAndroidTopic);
@@ -77,7 +77,7 @@ bridgeJsonToPlaintextTopic(getLivingRoomLampTopic, getBridgeColorHexLivingRoomTo
 bridgePlaintextToJsonTopic(setBridgeColorHexLivingRoomTopic, setLivingRoomLampTopic, "color.hex", { transition: 1 });
 
 client.on("message", (topic, payload) => {
-    console.debug(`Received Message: '${topic}' with '${payload}'`);
+    logger.debug({ topic, payload: payload.toString() }, "Received message");
 });
 
 client.on("message", (topic, payload) => {
@@ -99,16 +99,26 @@ client.on("message", (topic, payload) => {
         }
     }
     else if (topic === kitchenSwitchTopic) {
-        const state = (JSON.parse(payload.toString()) as ActionState).action.toUpperCase();
+        const action = (JSON.parse(payload.toString()) as ActionState).action;
+        if (!action) {
+            logger.debug({ topic }, "Received message without action, ignoring");
+            return;
+        }
+        const state = action.toUpperCase();
         const desiredLampState = { state };
         client.publish(setKitchenLampTopic, JSON.stringify(desiredLampState));
     }
     else if (topic === livingRoomSwitchTopic) {
-        const state = ((JSON.parse(payload.toString()) as ActionHueState).action.toUpperCase() as HueState);
+        const action = (JSON.parse(payload.toString()) as ActionHueState).action;
+        if (!action) {
+            logger.debug({ topic }, "Received message without action, ignoring");
+            return;
+        }
+        const state = action.toUpperCase() as HueState;
         handleHueSwitch(state);
     }
     else {
-        console.debug(`No mapping found for topic '${topic}'`);
+        logger.debug({ topic }, "No mapping found for topic");
     }
 });
 
@@ -171,11 +181,11 @@ function bridgeJsonToPlaintextTopic(subTopic: string, pubTopic: string, path: st
 
         const extracted = get(jsonPayload, path);
         if (!extracted) {
-            console.warn(`No result found for path: '%s'`, path);
+            logger.warn({ subTopic, path }, "No result found for path");
             return;
         }
         const extractedString = String(extracted);
-        console.debug(`Briding '%s' to '%s' with value '%s'`, subTopic, pubTopic, extractedString);
+        logger.debug({ subTopic, pubTopic, value: extractedString }, "Bridging JSON to plaintext topic");
         client.publish(pubTopic, extractedString);
     });
 }
@@ -202,7 +212,7 @@ function bridgePlaintextToJsonTopic(subTopic: string, pubTopic: string, property
         };  
         set(jsonPayload, property, payload.toString());
 
-        console.debug(`Briding '%s' to '%s' with value '%O'`, subTopic, pubTopic, jsonPayload);
+        logger.debug({ subTopic, pubTopic, payload: jsonPayload }, "Bridging plaintext to JSON topic");
         client.publish(pubTopic, JSON.stringify(jsonPayload));
     });
 }
